@@ -1,0 +1,111 @@
+	div.listOfChooseOrganigram_1 {
+		max-width: 1000px;
+		max-height: 500px;
+	 	text-align: center;
+	 	padding-bottom: 100px;
+	 	border-spacing: 12px 0;
+	}
+	
+	div.listOfChooseOrganigram_2 {
+		max-width: 1000px;
+		max-height: 500px;
+	 	text-align: center;
+	 	padding-bottom: 100px;
+	 	border-spacing: 12px 0;
+	 	padding: 0 0 100px; 0;
+	}
+	
+	div.listOfChooseOrganigram_2:nth-child(odd){
+		float: left;
+	}
+	
+	div.listOfChooseOrganigram_2:nth-child(even){
+		float: right;
+	}
+	
+	div.listOfChooseOrganigram_3 {
+		max-width: 1000px;
+		max-height: 500px;
+	 	text-align: center;
+	 	border-spacing: 12px 0; 
+	 	float: left; 
+	 	padding: 0 0 100px; 0;
+	}
+	
+	.figAIntuition {
+    background: url("../img/ai.svg") no-repeat scroll 50% 50% / 50px auto green;
+	}
+	
+	.figMentalLexicon {
+    background: url("../img/mental_lexicon.svg") no-repeat scroll 50% 50% / 50px auto #D41D1D;
+	}
+	
+	.figSources {
+    background: url("../img/sources.svg") no-repeat scroll 50% 50% / 50px auto #D41D1D;
+	}
+	
+	.figCompilance {
+    background: url("../img/compilance.svg") no-repeat scroll 50% 50% / 50px auto #D41D1D;
+	}
+	
+	.figMobile {
+    background: url("../img/mobile.svg") no-repeat scroll 50% 50% / 50px auto #D41D1D;
+	}
+	
+	div.listOfChooseOrganigram_3:nth-child(odd){
+		float: left;
+	}
+	
+	div.listOfChooseOrganigram_3:nth-child(even){
+		float: right;
+	}
+	
+	#ChooseAIntuitionFromOrganigram {
+		max-width: 1500px;
+		max-height: 1500px;
+	}
+	
+	input#hide {
+		margin: 50px 0 0 330px;
+	}
+	
+<<<<<<< .mine
+	 /*Holding BA, BU*/
+	label#labelBA {
+	  display: inline-block;
+	  width: 230px;
+=======
+	.figAIntuition {
+    background: url("../img/ai.svg") no-repeat scroll 50% 50% / 50px auto #235993;
+>>>>>>> .r4357
+	}
+	
+<<<<<<< .mine
+	label#labelBU {
+	  display: inline-block;
+	  width: 230px;
+=======
+	.figMentalLexicon {
+    background: url("../img/mental_lexicon.svg") no-repeat scroll 50% 50% / 50px auto #235993;
+>>>>>>> .r4357
+	}
+	
+<<<<<<< .mine
+	#fieldsetBU {
+		margin: -185px 0 0 0;
+=======
+	.figSources {
+    background: url("../img/sources.svg") no-repeat scroll 50% 50% / 50px auto #235993;
+>>>>>>> .r4357
+	}
+<<<<<<< .mine
+=======
+	
+	.figCompilance {
+    background: url("../img/compilance.svg") no-repeat scroll 50% 50% / 50px auto #235993;
+	}
+	
+	.figMobile {
+    background: url("../img/mobile.svg") no-repeat scroll 50% 50% / 50px auto #235993;
+	}
+>>>>>>> .r4357

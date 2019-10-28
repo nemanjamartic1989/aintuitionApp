@@ -1,0 +1,47 @@
+/*SET DIV FOR DISPLAY TABLE AFTER SAVE, UPDATE, DELETE*/
+div#displayTableSourcesReputation {
+	margin: 100px 0 0 0;
+}
+
+/*SET SEARCH LABEL*/
+label#search {
+	margin: 0 10px 0 0;
+}
+
+div#showCategoriesReputation {
+	margin: 0 0 0 50px;
+}
+
+label.inputLabel {
+	margin: 0 20px 0 0;
+}
+
+#showCategoryReputationUpdate {
+	margin: 20px 0 0 0;
+}
+
+#SiteSourceReputation {
+	margin: 0 0 0 3px;
+}
+
+#chooseCategorySources {
+	margin: 0 0 0 3px;
+}
+
+div#FormForFillFieldSource {
+	float: left;
+}
+
+table#displayTableSourcesReputationCategories {
+	margin: 0 0 0 0;
+}
+
+div#divSaveSourcesForm{
+
+	margin: 200px 0 0 1000px;
+}
+
+div#showCategoriesSourcesReputation {
+	float: right;
+	margin: 0 300px 0 0;
+}

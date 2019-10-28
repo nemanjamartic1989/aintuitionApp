@@ -1,0 +1,80 @@
+<?php
+
+$dir = dirname(__DIR__);
+include ($dir . "../../../classes/init.php");
+
+$ForecastSales = new ForecastSales();
+$Order = new Order();
+
+<<<<<<< .mine
+//var_dump($countForecast);
+=======
+>>>>>>> .r4039
+
+$countForecast = $ForecastSales->forecastDataCount();
+
+<<<<<<< .mine
+=======
+$listOrderedProduct = $Order -> listOrderedProduct();
+
+echo "<pre>".print_r($listOrderedProduct,1)."</pre>";
+//var_dump($countForecast);
+
+
+>>>>>>> .r4039
+// $argv = INI::getArguments();
+// $AIntuitionID = $argv["AIntuitionID"];
+$AIntuitionID = 13; //for test
+$AIntuition = new AIntuition($AIntuitionID);
+$AIntuitionParameters = json_decode($AIntuition->getFromAIntuition(array("AIntuitionParameters")));
+<<<<<<< .mine
+echo "<pre>".print_r($AIntuitionParameters,1)."</pre>";
+=======
+//echo "<pre>".print_r($AIntuitionParameters,1)."</pre>";
+>>>>>>> .r4039
+$asset = new Asset();
+
+$db = new DB();
+$res1 = $db->query("SELECT `businessPartnerName`, `businessPartnerID`, `spTypeID`, `spSubTypeID`, `businessPartnerWebSite` 
+						FROM `tdbBusinessPartner` WHERE businessPartnerType = :businessPartnerType",
+						array("businessPartnerType"=>"Client"));
+if(is_object($AIntuitionParameters)){
+	$cnt = array();	
+	foreach ($res1 as $bp) {
+		$businessPartnerID = $bp["businessPartnerID"];
+		$res2 = $db->query("SELECT COUNT( tdbProductOrder.businessPartnerID ) AS cnt, tdbSite.businessAreaID, tdbSite.siteBusinessunitID  
+									FROM tdbProductOrder 
+									JOIN tdbProductSortiment ON tdbProductOrder.productSortimentID = tdbProductSortiment.productSortimentID
+									JOIN tdbSite ON tdbProductSortiment.siteID = tdbSite.siteID
+									WHERE businessPartnerID = :businessPartnerID
+									GROUP BY tdbSite.businessAreaID, tdbSite.siteBusinessunitID",
+									array(
+										"businessPartnerID"=>$businessPartnerID
+										)
+							);
+		foreach ($res2 as $key => $value) {
+			if(in_array($value["businessAreaID"], $AIntuitionParameters->holding->businessArea)){
+				$cnt[$businessPartnerID]["businessArea"][$value["businessAreaID"]] += $value["cnt"];	
+				$cnt[$businessPartnerID]["businessArea"]["total"] += $value["cnt"];
+			}
+			
+			if(in_array($value["businessUnitID"], $AIntuitionParameters->holding->businessUnit)){
+				$cnt[$businessPartnerID]["businessUnit"][$value["businessUnitID"]] += $value["cnt"];
+				$cnt[$businessPartnerID]["businessUnit"]["total"] += $value["cnt"];
+			}
+		}
+		if(isset($cnt[$businessPartnerID]["businessArea"])){
+			ksort($cnt[$businessPartnerID]["businessArea"]);	
+		}
+		
+		if(isset($cnt[$businessPartnerID]["businessUnit"])){
+			ksort($cnt[$businessPartnerID]["businessUnit"]);	
+		}				
+	}
+}else{
+	$cnt["holding"] = $db->rowCount();
+}
+ksort($cnt);
+//$AIntuition->insertAIReport(json_encode($cnt));
+
+?>

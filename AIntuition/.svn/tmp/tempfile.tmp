@@ -1,0 +1,124 @@
+<?php
+	session_start();
+	include($_SERVER['DOCUMENT_ROOT']."/include/prog_head.php");
+?>
+<style>
+
+thead {
+  position: relative;
+  border: 1px solid #000;
+  padding-top: 37px;
+  background: #500;
+}
+thead.positioned {
+  position: absolute;
+  top:100px;
+  left:100px;
+  width:800px;
+  box-shadow: 0 0 15px #333;
+}
+.container {
+  overflow-y: auto;
+  height: 200px;
+}
+table {
+  border-spacing: 0;
+  width:100%;
+}
+/*td + td {
+  border-left:1px solid #eee;
+}*/
+td, th {
+  border-bottom:1px solid #eee;
+  background: #ddd;
+  color: #000;
+  padding: 10px 25px;
+}
+/*th {
+  height: 0;
+  line-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  color: transparent;
+  border: none;
+  white-space: nowrap;
+}*/
+/*th div{
+  position: absolute;
+  background: transparent;
+  color: #fff;
+  padding: 9px 25px;
+  top: 0;
+  margin-left: -25px;
+  line-height: normal;
+  border-left: 1px solid #800;
+}
+th:first-child div{
+  border: none;
+}*/
+</style>
+
+<section class="">
+  <div class="container">
+    <table class="tableRowColoring" width="100%" cellpadding="0" cellspacing="0" id="displayTableSourcesReputation">	
+  	    <thead id="tableSourceHeader">
+  	    	<tbody id="headerSource">
+				<tr class="table_header">
+				  <th class="tableNewBorderWhite" align='center'>Category<img id="typeFilterImg" title="Filter" src="/images/ui/buttons/filter.png" style="cursor: pointer;" onclick="DisplaySourcesReputationType()"/> <div id="typeListCategory" style="position: absolute;margin: 2px 0px 0px 105px;z-index: 999999;"></div></th>
+				  <th class="tableNewBorderWhite" align='center'>Sub Category Reputation</th>	
+				  <th class="tableNewBorderWhite" align='center'>Source - Language</th>	
+				  <th class="tableNewBorderWhite" align='center'>Edit</th>
+				  <th class="tableNewBorderWhite" align='center'>Remove</th>
+		  	  	</tr>
+	  	  	</tbody>
+  	  	</thead>
+  	  	<tbody id="displayDataFilter">
+  	  	<?php
+	    					
+	    	$q = "
+	    			SELECT sr.*, c.*, sc.* FROM tdbSourcesReputation sr  
+	    			INNER JOIN tdbAIntuitionCategory c 
+	    			ON sr.AIntuitionCategoryID = c.AIntuitionCategoryID
+	    			INNER JOIN tdbAIntuitionSubCategory sc 
+	    			ON sr.AIntuitionSubCategoryID = sc.AIntuitionSubCategoryID ORDER BY sr.SourcesReputationID DESC";
+					
+	    			$r = mysql_query($q); // Send a MySQL query.
+	    			
+	    			if(mysql_num_rows($r) > 0){ // Get number of rows in result.
+	    				while($row = mysql_fetch_array($r)){ // Fetch a result row as an associative array, a numeric array, or both.
+	    					$SourcesReputationID = $row['SourcesReputationID'];
+	    					$Category = $row['nameCategory'];
+							$SubCategory = $row['nameSubCategory'];
+							$Source = $row['SiteSource'];
+							$Source = json_decode($Source);
+							$Language = $row['nameLanguage'];
+				
+				
+				echo"<tr id=\"displayData\">";
+				echo"<td class='tableNewBorder' align='center'>" . $Category . "</td>"; 
+				echo"<td class='tableNewBorder' align='center'>" . $SubCategory . "</td>"; 
+				
+				?>
+				<td class='tableNewBorder' align='center'><?php foreach ($Source as $key => $value) {
+						echo "[".$key."]"." - "."[".$value."]"."<br>";
+					}?></td> 
+				<?php 
+				
+				echo"<td class='tableNewBorder' align='center'><img style='cursor:pointer' src='/images/ui/buttons/btn_edit.png' onclick='updateSourcesReputationForm($SourcesReputationID)'></td>";
+ 				echo"<td class='tableNewBorder' align='center'><img style='cursor:pointer' src='/images/ui/buttons/btn_delete.png' onclick='deleteSourcesReputation($SourcesReputationID)'></td>";
+
+				  
+				echo"</tr>"; 
+	  	  	  	
+	  	  	  }
+		  
+		  } else {
+		  		
+		  	echo"<tr><td colspan='7' align='center'><label class='red'>No Data</label></td></tr>";
+		  }
+  	  		
+  	  	?>
+  	  	</tbody>
+  	  </table>
+  </div>
+</section>

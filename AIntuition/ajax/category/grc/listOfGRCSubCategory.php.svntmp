@@ -1,0 +1,87 @@
+<?php include_once($_SERVER['DOCUMENT_ROOT']."/include/prog_head.php");?>
+<style>
+	#business {
+		width: 800px;
+		float: right;
+		margin-right: 100px;
+	}
+	
+	#fieldsetBU {
+		float: right;
+		width: 300px;
+	}
+	
+	#fieldsetBA {
+		width: 300px;
+	}
+	
+</style>
+<?php $id_GRC = $_POST['id'];?>
+<?php  if($id_GRC == '39'){  ?>
+
+<label id="SelectInutitionAreaLabel">Select Inutition Area</label><br /><br />
+						<label id="holdingLabel">Holding</label><input type="checkbox" id="holdingIntuitionArea" name="holdingIntuitionArea" value="holding" onchange="holdingGRC(39);"/>
+<div id="business"></div>
+<div id="displayStatus"></div>
+
+<?php } else if($id_GRC == '40'){ ?>
+	
+<label id="SelectInutitionAreaLabel">Select Inutition Area</label><br /><br />
+						<label id="holdingLabel">Holding</label><input type="checkbox" id="holdingIntuitionArea" name="holdingIntuitionArea" value="holding" onchange="holdingGRC(40);"/>
+<div id="business"></div>
+<div id="displayStatus"></div>
+
+<?php } else if($id_GRC == '41'){ ?>
+	
+<label id="SelectInutitionAreaLabel">Select Inutition Area</label>	
+
+
+<?php } else if($id_GRC == '42'){ ?>
+	
+<label id="SelectInutitionAreaLabel">Select Inutition Area</label><br /><br />
+						<label id="holdingLabel">Holding</label><input type="checkbox" id="holdingIntuitionArea" name="holdingIntuitionArea" value="holding" onchange="holdingGRC(42);"/>
+<div id="business"></div>
+<div id="displayStatus"></div>	
+	
+<?php } else if($id_GRC == '43'){ ?>
+
+<label id="SelectInutitionAreaLabel">Select Inutition Area</label>
+
+
+<?php } else if($id_GRC == '44'){ ?>
+	
+<label id="SelectInutitionAreaLabel">Select Inutition Area</label>	
+
+		
+	
+<?php } else if($id_GRC == '45'){ ?>
+	
+<label>Select Inutition Area</label>	
+
+		
+	
+<?php } else if($id_GRC == '46'){ ?>
+	
+<label id="SelectInutitionAreaLabel">Select Inutition Area</label>	
+	
+		
+	
+<?php } else if($id_GRC == '47'){ ?>
+	
+<label id="SelectInutitionAreaLabel">Select Inutition Area</label>	
+
+		
+	
+<?php } else if($id_GRC == '48'){ ?>
+	
+<label id="SelectInutitionAreaLabel">Select Inutition Area</label>	
+
+		
+	
+<?php } else if($id_GRC == '49'){ ?>
+	
+<label id="SelectInutitionAreaLabel">Select Inutition Area</label>	
+
+		
+	
+<?php } ?>

@@ -1,0 +1,475 @@
+<?php 
+	include_once($_SERVER['DOCUMENT_ROOT']."/core/core.php");
+	include_once($_SERVER['DOCUMENT_ROOT']."/include/_functions.php");
+	$dbConfig=new Config();
+	$dbParameter=$dbConfig::getPatameter();
+	$dbh= new DatabaseHandler($dbParameter['host'], $dbParameter['dbName'], $dbParameter['dbUser'], $dbParameter['dbPass']);
+	
+	$sql="SELECT languageID, languageName 
+	      FROM tdbLanguages 
+	      WHERE languageName='English' OR languageName='Deutsch'";
+	$result=$dbh->GetAll($sql);
+	$languages=array();
+	foreach($result as $row)
+	{
+		$languages[$row['languageID']]=$row['languageName'];
+	}
+	
+	$sql="SELECT l.languageID, languageName, shortName, words, tw.wordID
+          FROM tdbLanguages AS l
+          LEFT JOIN tdbAIntuitionTranslatedWords AS tw ON l.languageID = tw.languageID";
+    $result=$dbh->GetAll($sql);
+    $words=array();
+    foreach($result as $row)
+    {
+        $shortName = trim($row['shortName']);
+        $word      = trim($row['words']);
+        if(!empty($word))
+        {
+            $words[$shortName][]= $word;
+            $words['wordID']=$row['wordID'];
+        }
+    }
+?>
+
+<input type="button" onclick="backToMainMenu();" value="Back to main menu" style="float:right;"/><br /><br />
+
+<script>
+	$(document).ready(function(){
+	var mentalLexicon = $('#tableMentalLexicon').dataTable({
+	    "ajax":{
+	    		'type':'POST',
+	    		'url' :'/AIntuition/ajax/mentalLexicon/mentalLexicon.php',
+	    		"data": function ( d ) 
+	    		{
+                	d.action = 'get'
+            	}
+	    },
+	    "columns": [
+	      { "data": "wordForTranslate" },
+	      { "data": "language"},
+	      { "data": "categoriesPoints" },
+	      { "data": "edit"},
+	      { "data": "delete" }
+	    ],
+	    "aoColumnDefs": [
+	      { "bSortable": false, "aTargets": [-1] }
+	    ],
+	    "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+	    "oLanguage": {
+	      "oPaginate": {
+	        "sFirst":       " ",
+	        "sPrevious":    " ",
+	        "sNext":        " ",
+	        "sLast":        " ",
+	      },
+	      "sLengthMenu":    "Records per page: _MENU_",
+	      "sInfo":          "Total of _TOTAL_ records (showing _START_ to _END_)",
+	      "sInfoFiltered":  "(filtered from _MAX_ total records)"
+	    }
+	  });
+	   
+	   
+	 $(document).on('click','#saveMentalLexicon',function(e){
+	 	var validate=validation();
+		if(!validate)
+		{
+			return false;
+		}
+	 	
+	 	var enterprisePoints      = $("#enterpriseSliderOutput").val();
+		var clientPoints          = $("#clientSliderOutput").val();
+		var resellerPoints        = $("#resellerSliderOutput").val();
+		var suplierPoints         = $("#suplierSliderOutput").val();
+		var competitorPoints      = $("#competitorSliderOutput").val();
+		var serviceProviderPoints = $("#serviceProviderSliderOutput").val();
+	 	var wordLanguage          = $("#wordLanguage").val();
+	 	var wordForTranslate      = $("#wordForTranslate").val();
+	 	
+	 	var sendData={
+	 					wordLanguage:wordLanguage, wordForTranslate:wordForTranslate, action:"save",
+	 	                enterprisePoints:enterprisePoints, clientPoints:clientPoints, resellerPoints:resellerPoints,
+	 	                suplierPoints:suplierPoints, competitorPoints:competitorPoints, serviceProviderPoints:serviceProviderPoints
+	 	             };
+	  	var request   = $.ajax({
+	        url:          '/AIntuition/ajax/mentalLexicon/mentalLexicon.php',
+	        type:         'POST',
+	        beforeSend:function(){cursorLoaderShow();},
+	        cache:        false,
+	        data:         sendData,
+	      });
+	      request.done(function(output){
+	      	 var data      = JSON.parse(output);
+	      	 var translatedWords=data.data;
+	      	 if(data.result=="success")
+	      	 {
+	      	 	 $("#message").html("<span class='red'>Data has been saved.</span>");
+	             $("#translatedTable").append("<tr id='tableTr"+translatedWords.wordID+"'><td align='center'>"+translatedWords.en+"</td><td align='center'>"+translatedWords.de+"</td>" +
+				      "<td align='center'>"+translatedWords.es+"</td><td align='center'>"+translatedWords.it+"</td><td align='center'>"+translatedWords.pt+"</td><td align='center'>"+translatedWords.ru+"</td><td align='center'>"+translatedWords.zh+"</td><td align='center'>"+translatedWords.sr+"</td>" +
+					  "<td align='center'>"+translatedWords.sv+"</td><td align='center'>"+translatedWords.fr+"</td><td align='center'>"+translatedWords.hr+"</td><td align='center'>"+translatedWords.sk+"</td><td align='center'>"+translatedWords.cs+"</td><td align='center'>"+translatedWords.sl+"</td>" +
+					  "<td align='center'>"+translatedWords.hu+"</td><td align='center'>"+translatedWords.nl+"</td><td align='center'>"+translatedWords.ar+"</td><td align='center'>"+translatedWords.el+"</td><td align='center'>"+translatedWords.tr+"</td><td align='center'>"+translatedWords.ro+"</td>" +
+					  "<td align='center'>"+translatedWords.bg+"</td><td align='center'>"+translatedWords.da+"</td><td align='center'>"+translatedWords.fi+"</td><td align='center'>"+translatedWords.no+"</td><td align='center'>"+translatedWords.el+"</td></tr>");
+			      mentalLexicon.api().ajax.reload(function(){}, false);
+			      clearForm();
+	      	 }
+	      	 else
+	      	 {
+	      	 	$("#message").html("<span class='red'>"+data.data+".</span>");
+	      	 }
+	      	 
+	      	
+	      });
+	      request.fail(function(jqXHR, textStatus){
+	       
+	      });
+	      request.complete(function(){
+				cursorLoaderHide();
+		 });
+		 
+  	 }) 
+  	 
+  	 
+  	 $(document).on('click','#updateMentalLexicon',function(e){
+	  	var wordID=$("#hiddenWordID").val();
+	  	
+	  	var enterprisePoints      = $("#enterpriseSliderOutput").val();
+		var clientPoints          = $("#clientSliderOutput").val();
+		var resellerPoints        = $("#resellerSliderOutput").val();
+		var suplierPoints         = $("#suplierSliderOutput").val();
+		var competitorPoints      = $("#competitorSliderOutput").val();
+		var serviceProviderPoints = $("#serviceProviderSliderOutput").val();
+		
+	    var sendData={ 
+	    	           wordID:wordID, action:'update', enterprisePoints:enterprisePoints, clientPoints:clientPoints,
+	                   resellerPoints:resellerPoints, suplierPoints:suplierPoints, competitorPoints:competitorPoints, serviceProviderPoints:serviceProviderPoints
+	                  };
+	  	var request   = $.ajax({
+	        url:          '/AIntuition/ajax/mentalLexicon/mentalLexicon.php',
+	        type:         'POST',
+	        beforeSend:function(){cursorLoaderShow();},
+	        cache:        false,
+	        data:         sendData,
+	      });
+	      request.done(function(output){
+	      	    $("#wordLanguage").prop('disabled',false);
+				$("#wordForTranslate").prop('disabled',false);
+				$("#wordLanguage").val('--');
+				$("#wordForTranslate").val('');
+	      		$("#saveMentalLexicon").css("display",'inline');
+	  	        $("#updateMentalLexicon").css("display",'none');
+	  	        $("#message").html("<span class='red'>Data has been updated.</span>");
+	      	    clearForm();
+		      	mentalLexicon.api().ajax.reload(function(){}, false);
+	      });
+	      request.fail(function(jqXHR, textStatus){
+	       
+	      });
+	      request.complete(function(){
+				cursorLoaderHide();
+		 });
+		 
+  	 }) 
+  	 
+  	 $(document).on('click','#editMentalLexicon',function(e){
+	  	var wordID=$(this).attr('value');
+	  	$("#hiddenWordID").val(wordID);
+	  	
+	    var sendData={wordID:wordID, action:'edit'};
+	  	var request   = $.ajax({
+	        url:          '/AIntuition/ajax/mentalLexicon/mentalLexicon.php',
+	        type:         'POST',
+	        beforeSend:function(){cursorLoaderShow();},
+	        cache:        false,
+	        data:         sendData,
+	      });
+	      request.done(function(output){
+	      	    var data=JSON.parse(output);
+	      	    var editData=data.data;
+	      	    $("#wordLanguage").val(editData.languageID);
+				$("#wordForTranslate").val(editData.word);
+	      	    outputSave('enterpriseSlider', editData.enterprise)
+			 	outputSave('clientSlider', editData.client)
+			 	outputSave('resellerSlider', editData.reseller)
+			 	outputSave('suplierSlider', editData.supplier)
+			 	outputSave('competitorSlider', editData.competitor)
+			 	outputSave('serviceProviderSlider', editData.serviceprovider)
+			 	outputSave('enterpriseSliderOutput', editData.enterprise)
+			 	outputSave('clientSliderOutput', editData.client)
+			 	outputSave('resellerSliderOutput', editData.reseller)
+			 	outputSave('suplierSliderOutput', editData.supplier)
+			 	outputSave('competitorSliderOutput', editData.competitor)
+			 	outputSave('serviceProviderSliderOutput', editData.serviceprovider)
+	      	    $("#saveMentalLexicon").css("display",'none');
+	  	        $("#updateMentalLexicon").css("display",'inline');
+	      	    
+				$("#wordLanguage").prop('disabled',true);
+				$("#wordForTranslate").prop('disabled',true);
+		      	//mentalLexicon.api().ajax.reload(function(){}, false);
+	      });
+	      request.fail(function(jqXHR, textStatus){
+	       
+	      });
+	      request.complete(function(){
+				cursorLoaderHide();
+		 });
+		 
+  	 }) 
+  	 
+  	  $(document).on('click','#deleteMentalLexicon',function(e){
+	  	 var wordID=$(this).attr('value');
+		 var sendData={wordID:wordID, action:'delete'};
+	  	var request   = $.ajax({
+	        url:          '/AIntuition/ajax/mentalLexicon/mentalLexicon.php',
+	        type:         'POST',
+	        beforeSend:function(){cursorLoaderShow();},
+	        cache:        false,
+	        data:         sendData,
+	      });
+	      request.done(function(output){
+	      	    $('table#translatedTable tr#tableTr'+wordID).remove();
+	      	    $("#wordLanguage").prop('disabled',false);
+				$("#wordForTranslate").prop('disabled',false);
+				$("#wordLanguage").val('--');
+				$("#wordForTranslate").val('');
+	      		$("#saveMentalLexicon").css("display",'inline');
+	  	        $("#updateMentalLexicon").css("display",'none');
+		      	mentalLexicon.api().ajax.reload(function(){}, false);
+	      });
+	      request.fail(function(jqXHR, textStatus){
+	       
+	      });
+	      request.complete(function(){
+				cursorLoaderHide();
+		 });
+		 
+  	 }) 
+  	 
+  	 
+  	 function validation()
+  	 {
+  	 	if($("#wordLanguage").val()=="--" || $("#wordLanguage").val()=="")
+		{
+			$("#wordLanguage").css('background','lightgray');
+			$("#wordLanguage").focus();
+			$("#message").html("<span class='red'>Please fill out this field.</span>");
+			return false;
+		}
+		
+		if($("#wordForTranslate").val()=="")
+		{
+			$("#wordForTranslate").css('background','lightgray');
+			$("#wordForTranslate").focus();
+			$("#message").html("<span class='red'>Please fill out this field.</span>");
+			return false;
+		}
+		
+		return true;
+  	 }
+  	   
+  	 function clearForm()
+  	 {
+  	 	$("#wordLanguage").val("--");
+	 	$("#wordForTranslate").val("");
+	 	outputSave('enterpriseSliderOutput', 0)
+	 	outputSave('clientSliderOutput', 0)
+	 	outputSave('resellerSliderOutput', 0)
+	 	outputSave('suplierSliderOutput', 0)
+	 	outputSave('competitorSliderOutput', 0)
+	 	outputSave('serviceProviderSliderOutput', 0)
+	 	
+	 	outputSave('enterpriseSlider', 0)
+	 	outputSave('clientSlider', 0)
+	 	outputSave('resellerSlider', 0)
+	 	outputSave('suplierSlider', 0)
+	 	outputSave('competitorSlider', 0)
+	 	outputSave('serviceProviderSlider', 0)
+  	 	
+  	 }
+});
+
+</script>
+<fieldset><legend>Mental Lexicon Form</legend>
+
+<table style="width: 100%">
+	<tr>
+		<td style="width: 33%">
+			<table>
+				<tr>
+					<td><label>Choose Language:</label></td>
+					<td>
+						<select id="wordLanguage">
+							<option value="--">--</option>
+							<?php
+							foreach($languages as $languageID=>$languageName)
+							{
+								echo "<option value='".$languageID."'>".$languageName."</option>";
+							}
+							?>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td><label>Word for translate:</label></td>
+					<td><input type="text" id="wordForTranslate"></td>
+				</tr>
+			</table>
+		</td>
+		<td style="width: 50%">
+			<table class="tableRowColoring" style="width: 100%" cellpadding="0" cellspacing="0"> 
+				<tr class="table_header">
+				  <th class="tableNewBorderWhite" align='center'>Categories</th>
+				  <th class="tableNewBorderWhite" align='center'>Points</th>
+				 
+		  	  	</tr>
+				<tr>
+					<td align='center' style="width: 50%"><label>Enterprise	</label></td>
+					<td>
+						<input type="range" min="1" max="5" value="0" id="enterpriseSlider" name="enterpriseSlider" step="1" oninput="outputSave('enterpriseSliderOutput', value)" style="margin: 0 0 0 20px;"/>
+		                <output for="enterpriseSlider" id="enterpriseSliderOutput">0 </output>
+					</td>
+				</tr>
+				<tr>
+					<td align='center' style="width: 50%"><label>Client</label></td>
+					<td>
+						<input type="range" min="1" max="5" value="0" id="clientSlider" name="clientSlider" step="1" oninput="outputSave('clientSliderOutput', value)" style="margin: 0 0 0 20px;"/>
+		                <output for="clientSlider" id="clientSliderOutput">0 </output>
+					</td>
+				</tr>
+				<tr>
+					<td align='center' style="width: 50%"> <label>Reseller</label></td>
+					<td>
+						<input type="range" min="1" max="5" value="0" id="resellerSlider" name="resellerSlider" step="1" oninput="outputSave('resellerSliderOutput', value)" style="margin: 0 0 0 20px;"/>
+		                <output for="resellerSlider" id="resellerSliderOutput">0 </output>
+					</td>
+				</tr>
+				<tr>
+					<td align='center' style="width: 50%"><label>Supplier</label></td>
+					<td>
+						<input type="range" min="1" max="5" value="0" id="suplierSlider" name="suplierSlider" step="1" oninput="outputSave('suplierSliderOutput', value)" style="margin: 0 0 0 20px;"/>
+		                <output for="suplierSlider" id="suplierSliderOutput">0 </output>
+					</td>
+				</tr>
+				<tr>
+					<td align='center' style="width: 50%"><label>Competitor</label></td>
+					<td>
+						<input type="range" min="1" max="5" value="0" id="competitorSlider" name="competitorSlider" step="1" oninput="outputSave('competitorSliderOutput',value)" style="margin: 0 0 0 20px;"/>
+		                <output for="competitorSlider" id="competitorSliderOutput">0 </output>
+					</td>
+				</tr>
+				<tr>
+					<td align='center' style="width: 50%"><label>Service Provider</label></td>
+					<td>
+						<input type="range" min="1" max="5" value="0" id="serviceProviderSlider" name="serviceProviderSlider" step="1" oninput="outputSave('serviceProviderSliderOutput',value)" style="margin: 0 0 0 20px;"/>
+		                <output for="serviceProviderSlider" id="serviceProviderSliderOutput">0 </output>
+					</td>
+				</tr>
+			</table>
+		</td>
+		<td style="width: 20%">
+			<fieldset id="legendCategoriesPoints" style="float: right; width: 100px;"><legend>Legend</legend>
+		  	  		
+	  	  		<div><label>1</label><div style="width: 10px; height: 10px; background-color: red; float: right;"></div></div>
+	  	  		<div><label>2</label><div style="width: 10px; height: 10px; background-color: red; float: right;"></div></div>
+	  	  		<div><label>3</label><div style="width: 10px; height: 10px; background-color: white; border: 1px solid black; float: right;"></div></div>
+	  	  		<div><label>4</label><div style="width: 10px; height: 10px; background-color: green; float: right;"></div></div>
+	  	  		<div><label>5</label><div style="width: 10px; height: 10px; background-color: green; float: right;"></div></div>
+
+	  	  	</fieldset>
+		</td>
+	</tr>
+</table>
+<table style="width: 100%; margin-top: 20px; margin-bottom: 20px;">
+	<tr>
+		<td width="33%" align='center' id="message">&nbsp;</td>
+		<td width="33%" align='center'>
+			<input type="button" id="updateMentalLexicon" style="display: none" value="Update">
+			<input type="button" id="saveMentalLexicon" value="Save">
+		</td>
+		<td width="33%" align='center'>&nbsp;</td>
+	</tr>
+</table>
+
+
+<div id="mentalLexiconDiv" class="clientMask cursorP" title="Expand List" onclick="showList('mentalLexicon');" style="min-height:16px; padding: 3px 5px; margin: 5px 0;"><img id="<?php echo $shortName; ?>Img" src="/images/ui/arrowDown.png"></img>Translated Words</div>
+	<div id="mentalLexicon" style="display:none; max-width: 1090px; overflow-x: auto; max-height:200px; overflow-y: auto"  >
+		<table class="tableRowColoring" style="width: 100%;" id="translatedTable">
+            <tr class="table_header">
+                <th align="center">English</th>
+                <th align="center">Deutsch</th>
+                <th align="center">Español</th>
+                <th align="center">Italiano</th>
+                <th align="center">Português</th>
+                <th align="center">Русский язык</th>
+                <th align="center">中文</th>
+                <th align="center">Srpski </th>
+                <th align="center">Svenska</th>
+                <th align="center">Français</th>
+                <th align="center">Hrvatski</th>
+                <th align="center">Slovenščina</th>
+                <th align="center">Čeština / Český jazyk</th>
+                <th align="center">Slovenčina</th>
+                <th align="center">Magyar</th>
+                <th align="center">Dutch</th>
+                <th align="center">اللغة العربية</th>
+                <th align="center">עברית</th>
+                <th align="center">Türkçe</th>
+                <th align="center">Român</th>
+                <th align="center">Bãlgarski</th>
+                <th align="center">Dansk</th>
+                <th align="center">Suomi / Suomen kieli</th>
+                <th align="center">Norsk</th>
+                <th align="center">ελληνικά</th>
+            </tr>
+             <?php
+            $count=count($words['en']);
+            for($i=0;$i<$count; $i++)
+            {
+
+                echo "<tr id='tableTr".$row['wordID']."'>";
+                    echo "<td align=\"center\">".$words['en'][$i]."</td>";
+                    echo "<td align=\"center\">".$words['de'][$i]."</td>";
+                    echo "<td align=\"center\">".$words['es'][$i]."</td>";
+                    echo "<td align=\"center\">".$words['it'][$i]."</td>";
+                    echo "<td align=\"center\">".$words['pt'][$i]."</td>";
+                    echo "<td align=\"center\">".$words['ru'][$i]."</td>";
+                    echo "<td align=\"center\">".$words['zh'][$i]."</td>";
+                    echo "<td align=\"center\">".$words['sr'][$i]."</td>";
+                    echo "<td align=\"center\">".$words['sv'][$i]."</td>";
+                    echo "<td align=\"center\">".$words['fr'][$i]."</td>";
+                    echo "<td align=\"center\">".$words['hr'][$i]."</td>";
+                    echo "<td align=\"center\">".$words['sk'][$i]."</td>";
+                    echo "<td align=\"center\">".$words['cs'][$i]."</td>";
+                    echo "<td align=\"center\">".$words['sl'][$i]."</td>";
+                    echo "<td align=\"center\">".$words['hu'][$i]."</td>";
+                    echo "<td align=\"center\">".$words['nl'][$i]."</td>";
+                    echo "<td align=\"center\">".$words['ar'][$i]."</td>";
+                    echo "<td align=\"center\">".$words['el'][$i]."</td>";
+                    echo "<td align=\"center\">".$words['tr'][$i]."</td>";
+                    echo "<td align=\"center\">".$words['ro'][$i]."</td>";
+                    echo "<td align=\"center\">".$words['bg'][$i]."</td>";
+                    echo "<td align=\"center\">".$words['da'][$i]."</td>";
+                    echo "<td align=\"center\">".$words['fi'][$i]."</td>";
+                    echo "<td align=\"center\">".$words['no'][$i]."</td>";
+                    echo "<td align=\"center\">".$words['el'][$i]."</td>";
+                echo "</tr>";
+            }
+            ?>
+        </table>
+	</div>
+</div>
+
+<table id="tableMentalLexicon" class="tableRowColoring"  style="width: 100%;     margin-top: 20px;" cellspacing="0" width="100%">
+        <thead>
+            <tr class="table_header">
+                <th>Word for translate</th>
+                <th>Language</th>
+                <th>Categories - Points</th>
+                <th>Edit</th>
+                <th>Remove</th>
+            </tr>
+        </thead>
+</table>
+
+</fieldset>
+
+<input type="hidden" id="hiddenWordID" value="">

@@ -1,0 +1,23 @@
+label#search {
+	margin: 0 10px 0 0;
+}
+
+#translateWord {
+	float: left;
+	margin: 0 0 0 50px;
+}
+
+div#displayTableForTranslatedWords{
+	max-width: 1150px; 
+	overflow-x: auto;  
+	float: left;
+	margin: 60px 0 60px 0;
+}
+
+select#chosenWordForTranslate {
+	margin: 0 0 0 20px;
+}
+
+div#displayTableForTranslatedWordsInAllLanguages{
+	display: none;
+}

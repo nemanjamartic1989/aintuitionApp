@@ -1,0 +1,63 @@
+<?php
+
+$dir = dirname(__DIR__);
+include ($dir . "../../../classes/init.php");
+
+$ForecastSales = new ForecastSales();
+$countForecast = $ForecastSales->forecastDataCount(1,54915,3);
+
+//var_dump($countForecast);
+
+
+// $argv = INI::getArguments();
+// $AIntuitionID = $argv["AIntuitionID"];
+$AIntuitionID = 13; //for test
+$AIntuition = new AIntuition($AIntuitionID);
+$AIntuitionParameters = json_decode($AIntuition->getFromAIntuition(array("AIntuitionParameters")));
+echo "<pre>".print_r($AIntuitionParameters,1)."</pre>";
+$asset = new Asset();
+
+$db = new DB();
+$res1 = $db->query("SELECT `businessPartnerName`, `businessPartnerID`, `spTypeID`, `spSubTypeID`, `businessPartnerWebSite` 
+						FROM `tdbBusinessPartner` WHERE businessPartnerType = :businessPartnerType",
+						array("businessPartnerType"=>"Client"));
+if(is_object($AIntuitionParameters)){
+	$cnt = array();	
+	foreach ($res1 as $bp) {
+		$businessPartnerID = $bp["businessPartnerID"];
+		$res2 = $db->query("SELECT COUNT( tdbProductOrder.businessPartnerID ) AS cnt, tdbSite.businessAreaID, tdbSite.siteBusinessunitID  
+									FROM tdbProductOrder 
+									JOIN tdbProductSortiment ON tdbProductOrder.productSortimentID = tdbProductSortiment.productSortimentID
+									JOIN tdbSite ON tdbProductSortiment.siteID = tdbSite.siteID
+									WHERE businessPartnerID = :businessPartnerID
+									GROUP BY tdbSite.businessAreaID, tdbSite.siteBusinessunitID",
+									array(
+										"businessPartnerID"=>$businessPartnerID
+										)
+							);
+		foreach ($res2 as $key => $value) {
+			if(in_array($value["businessAreaID"], $AIntuitionParameters->holding->businessArea)){
+				$cnt[$businessPartnerID]["businessArea"][$value["businessAreaID"]] += $value["cnt"];	
+				$cnt[$businessPartnerID]["businessArea"]["total"] += $value["cnt"];
+			}
+			
+			if(in_array($value["businessUnitID"], $AIntuitionParameters->holding->businessUnit)){
+				$cnt[$businessPartnerID]["businessUnit"][$value["businessUnitID"]] += $value["cnt"];
+				$cnt[$businessPartnerID]["businessUnit"]["total"] += $value["cnt"];
+			}
+		}
+		if(isset($cnt[$businessPartnerID]["businessArea"])){
+			ksort($cnt[$businessPartnerID]["businessArea"]);	
+		}
+		
+		if(isset($cnt[$businessPartnerID]["businessUnit"])){
+			ksort($cnt[$businessPartnerID]["businessUnit"]);	
+		}				
+	}
+}else{
+	$cnt["holding"] = $db->rowCount();
+}
+ksort($cnt);
+//$AIntuition->insertAIReport(json_encode($cnt));
+
+?>
